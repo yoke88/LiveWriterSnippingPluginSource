@@ -22,11 +22,9 @@ namespace LiveWriterSnippingPlugin
 
 
 
-
-
-  public class PlugIn : SmartContentSource
+  public class PlugIn : ContentSource
   {
-
+    
       public static bool Is64BitOperatingSystem()
       {
           if (IntPtr.Size == 8)  // 64-bit programs run only on Win64
@@ -77,16 +75,12 @@ namespace LiveWriterSnippingPlugin
       [return: MarshalAs(UnmanagedType.Bool)]
       static extern bool IsWow64Process(IntPtr hProcess, out bool wow64Process);
 
-    public override SmartContentEditor CreateEditor(ISmartContentEditorSite editorSite)
-    {
-      return (null);
-    }
-
 
     public override DialogResult CreateContent(
-      IWin32Window dialogOwner, ISmartContent newContent)
+      IWin32Window dialogOwner, ref string newContent)
     {
       DialogResult result = DialogResult.Abort;
+      newContent = "";
 
       try
       {
@@ -113,12 +107,14 @@ namespace LiveWriterSnippingPlugin
         // Grab the image data from the clipboard.
         if (Clipboard.ContainsImage())
         {
-          string snipName = string.Format("{0}snip.bmp",
-            Guid.NewGuid().ToString());
+          string snipName = string.Format("{0}snip.png",Guid.NewGuid().ToString());
+          string tempImagePath = Environment.ExpandEnvironmentVariables(string.Format(@"%temp%\{0}",snipName));
+          Image tempImage = Clipboard.GetImage();
+          tempImage.Save(tempImagePath);
 
-          newContent.Files.AddImage(snipName, Clipboard.GetImage(),
-            ImageFormat.Bmp);
-
+          //newContent.Files.AddImage(snipName, tempImage,
+          //  ImageFormat.Bmp);
+          newContent=string.Format(@"<img src='file://{0}' />" , tempImagePath);
           result = DialogResult.OK;
         }
         else
@@ -133,19 +129,6 @@ namespace LiveWriterSnippingPlugin
           ex.Message);
       }
       return (result);
-    }
-    public override string GeneratePublishHtml(
-      ISmartContent content, IPublishingContext publishingContext)
-    {
-      string htmlContent = string.Empty;
-
-      if ((content.Files != null) && (content.Files.Filenames != null) &&
-        (content.Files.Filenames.Length > 0))
-      {
-        htmlContent = string.Format("<img src=\"{0}\"/>",
-          content.Files.GetUri(content.Files.Filenames[0]));
-      }
-      return (htmlContent);
     }
   }
 }
