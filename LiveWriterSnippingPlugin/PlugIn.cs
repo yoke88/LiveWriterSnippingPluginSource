@@ -84,13 +84,6 @@ namespace LiveWriterSnippingPlugin
 
       try
       {
-        //(System.IO.File.Exists(@"c:\windows\system32\SnippingTool.exe")){
-         // Process p = Process.Start(@"c:\windows\system32\SnippingTool.exe");
-           //p.WaitForExit();
-       //{else{
-        //     PluginDiagnostics.DisplayError(@"SnipTool Exist test","c:\\windows\\system32\\SnippingTool.exe not found");
-       // }
-
           string path = "";
 
           if (Is64BitOperatingSystem())
